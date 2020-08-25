@@ -2,6 +2,7 @@ package com.wen.demo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wen.pojo.Person;
+import com.wen.pojo.SmsLogs;
 import com.wen.utils.ESClient;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -17,14 +18,15 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Demo4 {
 
     ObjectMapper mapper = new ObjectMapper();
     RestHighLevelClient client = ESClient.getRestHighLevelClient();
-    String index = "person";
-    String type="man";
+
 
 
     /**
@@ -33,7 +35,8 @@ public class Demo4 {
      */
     @Test
     public void createMore()throws Exception{
-
+        String index = "person";
+        String type="man";
 
         Person p1 = new Person(1,"占山",23,new Date());
         Person p2 = new Person(2,"里斯",23,new Date());
@@ -56,7 +59,8 @@ public class Demo4 {
      */
     @Test
     public void delMore()throws Exception{
-
+        String index = "person";
+        String type="man";
         BulkRequest request = new BulkRequest();
         request.add(new DeleteRequest(index,type,"1"));
         request.add(new DeleteRequest(index,type,"2"));
@@ -121,6 +125,53 @@ public class Demo4 {
         CreateIndexRequest request = new CreateIndexRequest(index).settings(setting).mapping(type,mappings);
         CreateIndexResponse response = client.indices().create(request, RequestOptions.DEFAULT);
         System.out.println(response.toString());
+    }
+
+    /**
+     * 添加测试数据
+     * @throws Exception
+     */
+    @Test
+    public void createDoc()throws  Exception{
+        String index = "sms-logs-index";
+        String type="sms-logs-type";
+        String longcode = "1008687";
+        String mobile ="138340658";
+        List<String> companies = new ArrayList<>();
+        companies.add("腾讯课堂");
+        companies.add("阿里旺旺");
+        companies.add("海尔电器");
+        companies.add("海尔智家公司");
+        companies.add("格力汽车");
+        companies.add("苏宁易购");
+        List<String> provinces = new ArrayList<>();
+        provinces.add("北京");
+        provinces.add("重庆");
+        provinces.add("上海");
+        provinces.add("晋城");
+        BulkRequest bulkRequest = new BulkRequest();
+        for (int i = 1; i <16 ; i++) {
+            Thread.sleep(1000);
+            SmsLogs s1 = new SmsLogs();
+            s1.setId(i);
+            s1.setCreateDate(new Date());
+            s1.setSendDate(new Date());
+            s1.setLongCode(longcode+i);
+            s1.setMobile(mobile+2*i);
+            s1.setCorpName(companies.get(i%5));
+            s1.setSmsContent(SmsLogs.doc.substring((i-1)*100,i*100));
+            s1.setState(i%2);
+            s1.setOperatorId(i%3);
+            s1.setProvince(provinces.get(i%4));
+            s1.setIpAddr("127.0.0."+i);
+            s1.setReplyTotal(i*3);
+            s1.setFee(i*6+"");
+            String json1  = mapper.writeValueAsString(s1);
+            bulkRequest.add(new IndexRequest(index,type,s1.getId().toString()).source(json1, XContentType.JSON));
+            System.out.println("数据"+i+s1.toString());
+
+            BulkResponse responses = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+        }
     }
 
 
