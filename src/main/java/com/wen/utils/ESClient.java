@@ -14,7 +14,7 @@ public class ESClient {
      * @return
      */
     public static RestHighLevelClient getRestHighLevelClient(){
-        HttpHost httpHost = new HttpHost("192.168.200.144",9200);
+        HttpHost httpHost = new HttpHost("IP地址",9200);
         RestClientBuilder restClientBuilder = RestClient.builder(httpHost);
         return  new RestHighLevelClient(restClientBuilder);
     }
