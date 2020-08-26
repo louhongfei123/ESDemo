@@ -5,6 +5,7 @@ import com.wen.utils.ESClient;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -45,9 +46,27 @@ public class SearchDemo1 {
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
             System.out.println(sourceAsMap);
         }
+    }
 
-
-
+    /**
+     * terms查询
+     * @throws Exception
+     */
+    @Test
+    public void termsSerach()throws Exception{
+        //构建查询请求对象
+        SearchRequest request = new SearchRequest(index);
+        request.types(type);
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        //使用terms查询
+        builder.query(QueryBuilders.termsQuery("province","北京","上海"));
+        request.source(builder);
+        //获取返回值
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        for(SearchHit hit : response.getHits().getHits()){
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            System.out.println(sourceAsMap);
+        }
     }
 
 }
