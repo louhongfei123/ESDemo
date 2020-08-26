@@ -7,6 +7,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -64,6 +65,87 @@ public class SearchDemo1 {
         //获取返回值
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
         for(SearchHit hit : response.getHits().getHits()){
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            System.out.println(sourceAsMap);
+        }
+    }
+
+
+    /**
+     * match_all查询
+     * @throws Exception
+     */
+    @Test
+    public void match_AllSearch()throws Exception{
+        SearchRequest request = new SearchRequest(index);
+        request.types(type);
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders.matchAllQuery());
+        //默认查询十条数据 可用size指定条数
+        builder.size(20);
+        request.source(builder);
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        for(SearchHit hit : response.getHits().getHits()){
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            System.out.println(sourceAsMap);
+        }
+    }
+
+    /**
+     * match查询
+     * @throws Exception
+     */
+    @Test
+    public void matchSearch()throws Exception{
+        SearchRequest request = new SearchRequest(index);
+        request.types(type);
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders.matchQuery("smsContent","一群孩童"));
+        request.source(builder);
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        SearchHit[] hits = response.getHits().getHits();
+        System.out.println(hits.length);
+        for(SearchHit hit : hits){
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            System.out.println(sourceAsMap);
+        }
+    }
+
+    /**
+     * matchBoolean查询
+     * @throws Exception
+     */
+    @Test
+    public void matchBooleanSearch()throws Exception{
+        SearchRequest request = new SearchRequest(index);
+        request.types(type);
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders.matchQuery("smsContent","古老 简单").operator(Operator.AND));
+        request.source(builder);
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        SearchHit[] hits = response.getHits().getHits();
+        System.out.println(hits.length);
+        for(SearchHit hit : hits){
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            System.out.println(sourceAsMap);
+        }
+    }
+
+    /**
+     * multi_match查询
+     * @throws Exception
+     */
+    @Test
+    public void multi_matchSearch()throws Exception{
+        SearchRequest request = new SearchRequest(index);
+        request.types(type);
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders.multiMatchQuery("北京","smsContent","province"));
+        request.source(builder);
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        SearchHit[] hits = response.getHits().getHits();
+        System.out.println(hits.length);
+        for(SearchHit hit : hits){
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
             System.out.println(sourceAsMap);
         }
